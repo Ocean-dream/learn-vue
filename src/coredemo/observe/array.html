@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    // 数组对象
+    // 通过传入一个数组来生成一个对象使其具有数组原型上的方法
+    let test = Array.prototype
+    let testObj = Object.create(test)
+    testObj[0] = 'aaa'
+    testObj[1] = 'bbb'
+    // testObj.push('eee')
+    console.log(testObj) // {0：'aaaa, 1:'bbb'}
+    console.log('数组对象的长度'+ testObj.length) // 0
+    // 数组
+    let testArray = new Array()
+    testArray[0] = 'ccc'
+    console.log(testArray)
+    console.log('数组对象的长度'+ testArray.length) // 1
+    // 对象
+    var obj = {}
+    // obj.push('didi')
+    console.log(obj)
+  </script>
+</body>
+</html>
