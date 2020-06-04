@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    <p id="test"></p>
+  </div>
+  <script>
+    // 声明一个订阅者
+   class Dep {
+     constructor() {
+       // 初始化一个数组  存放所有订阅者
+       this.subs = []
+     }
+     addSubs (sub) {
+        this.subs.push(sub)
+     }
+     // 通知视图进行更新
+     notify () {
+       this.subs.forEach(item => {
+         item.update()
+       })
+     }
+   }
+   // 声明一个观察者
+   class Watcher {
+     constructor () {
+        Dep.target = this
+     }
+     update () {
+      let test = document.querySelector('#test')
+      test.innerHTML = v._data.name
+       console.log('视图更新了')
+     }
+   } 
+   Dep.target = null
+   // 依赖收集
+   function observer (that,data, val) {
+     let _this = that
+     // new 一个订阅者对象
+     const dep = new Dep()
+     let handler = {
+       get(tget, property) {
+          dep.addSubs(Dep.target)
+          return tget[property]
+       },
+       set (tget, key, val, oldVal) {
+        //  console.log(oldVal) // {name:333}
+        //  console.log(val)
+         if (oldVal.name == val) return
+          let result = Reflect.set(tget, key, val)
+          dep.notify()
+          return result
+       }
+     }
+     _this._data = new Proxy(data, handler)
+   }
+   // 定义观察者
+  //  function observer(that,data) {
+  //   for(var key in data){
+  //     defineReactive(that,data, key, data[key])
+  //   }
+  // }
+   class Vue {
+    constructor (option) {
+        this._data = option.data
+        observer (this, this._data)
+        // 新建一个观察者对象，new的同时Dep.target将会指向这个watcher对象
+        new Watcher()
+        // 模拟render
+        console.log('render', this._data.name)
+      }
+  }
+  let v= new Vue({
+    data: {
+      name: '333',
+    }
+  })
+  v._data.name = '777'
+  // console.log(v)
+  </script>
+  <!-- 摘抄自掘金染陌大神 -->
+</body>
+</html>

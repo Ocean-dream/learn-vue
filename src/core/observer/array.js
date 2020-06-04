@@ -7,7 +7,6 @@ import { def } from '../util/index'
 
 // 取得原生数组的原型
 const arrayProto = Array.prototype
-// 创建一个数组对象,create中传入一个数组原型，使对象具有数组的方法       ====》配合array.html
 export const arrayMethods = Object.create(arrayProto)
 // 列举出需要重写的方法
 const methodsToPatch = [
@@ -19,6 +18,30 @@ const methodsToPatch = [
   'sort',
   'reverse'
 ]
+methodsToPatch.forEach(function (method) {
+  // cache original method
+  // 缓存数组的原生方法 
+  const original = arrayProto[method]
+  def(arrayMethods, method, function mutator (...args) {
+    const result = original.apply(this, args)
+    const ob = this.__ob__
+    let inserted
+    switch (method) {
+      case 'push':   // 返回新数组
+      case 'unshift':  // 修改原有的数组
+      inserted = args
+      break
+      case 'splice':
+        inserted = args.slice(2)
+        break
+      }
+      if (inserted) ob.observeArray(inserted)
+      // notify change
+      // 通知所有订阅者
+      ob.dep.notify()
+      return result
+  })
+})
 
 /**
  * Intercept mutating methods and emit events
@@ -41,28 +64,3 @@ const methodsToPatch = [
  *  })
  *}
  */
-
-methodsToPatch.forEach(function (method) {
-  // cache original method
-  // 缓存数组的原生方法 
-  const original = arrayProto[method]
-  def(arrayMethods, method, function mutator (...args) {
-    // 利用数组的原生方法进行操作
-    const result = original.apply(this, args)
-    const ob = this.__ob__
-    let inserted
-    switch (method) {
-      case 'push':   // 新创建
-      case 'unshift':  // 修改原有的数组
-        inserted = args
-        break
-      case 'splice':
-        inserted = args.slice(2)
-        break
-    }
-    if (inserted) ob.observeArray(inserted)
-    // notify change
-    ob.dep.notify()
-    return result
-  })
-})

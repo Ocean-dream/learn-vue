@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+
+  </div>
+  <script>
+    function cb(val) {
+      document.querySelector('#app').innerHTML = val
+      console.log('视图更新了')
+    }
+    // 实现响应式
+    function defineReactive(obj, key, value) {
+     Object.defineProperty(obj, key,{
+        enumr: true,
+        configurable: true,
+        get: function () {
+          return value
+        },
+        set: function (newVal) {
+          if (newVal == value) return
+          value  = newVal
+          cb(value)
+        }
+      })
+    }
+    // 定义观察者
+    function abserve(obj) {
+      if (!obj || typeof(obj) !== 'object') return
+      Object.keys(obj).forEach(key => {
+        defineReactive(obj, key, obj[key])
+      })
+    }
+
+    // 模拟双向绑定
+    class Vue {
+      constructor (option) {
+        this._data = option.data
+        abserve(this._data)
+      }
+    }
+
+    let v = new Vue({
+      data:{
+        name:'zs'
+      }
+    })
+    console.log(v)
+    // v._data.name = 'ls'
+  </script>
+  <!-- 摘抄自掘金柒陌大神 -->
+</body>
+</html>

@@ -23,6 +23,7 @@ let uid = 0
  * and fires callback when the expression value changes.
  * This is used for both the $watch() api and directives.
  */
+// 依赖收集  数据改变时，调用回调函数
 export default class Watcher {
   vm: Component;
   expression: string;
@@ -53,6 +54,7 @@ export default class Watcher {
     if (isRenderWatcher) {
       vm._watcher = this
     }
+    // 存放订阅者实例
     vm._watchers.push(this)
     // options
     if (options) {

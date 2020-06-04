@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app"></div>
+  <script>
+    // 声明一个订阅者
+   class Dep {
+     constructor() {
+       // 防止需要被订阅的元素
+       this.subs = []
+     }
+     addSubs (sub) {
+        this.subs.push(sub)
+     }
+     // 通知视图进行更新
+     notify () {
+       this.subs.forEach(item => {
+         item.update()
+       })
+     }
+   }
+   // 声明一个观察者
+   class Watcher {
+     constructor () {
+        Dep.target = this
+     }
+     update () {
+       console.log('视图更新了')
+     }
+   } 
+   Dep.target = null
+   // 依赖收集
+   function defineReactive (obj, key, val) {
+     // new 一个订阅者对象
+     const dep = new Dep()
+     Object.defineProperty(obj, key, {
+       enumerable: true,
+       configurable: true,
+       get: function () {
+         // 将当前watcher对象加入到dep的subs中
+         dep.addSubs(Dep.target)
+         return val
+       },
+       set: function (newVal) {
+         console.log(newVal)
+         console.log(val)
+         if (newVal == val) return
+         // 不相同调用notify函数通知视图更新
+         dep.notify()
+       }
+     })
+   }
+   // 定义观察者
+   function observer(obj) {
+      if (!obj || typeof(obj) !== 'object') return
+      Object.keys(obj).forEach(key => {
+        defineReactive(obj, key, obj[key])
+      })
+    }
+   class Vue {
+    constructor (option) {
+      console.log(option)
+        this._data = option.data
+        observer (this._data)
+        // 新建一个观察者对象，new的同时Dep.target将会指向这个watcher对象
+        new Watcher()
+        // 模拟render 
+        console.log('render', this._data.name)
+      }
+  }
+  let v= new Vue({
+    data: {
+      name: '333'
+    }
+  })
+  v._data.name = '4444'
+  // console.log(v)
+  </script>
+  <!-- 摘抄自掘金柒陌大神 -->
+</body>
+</html>
